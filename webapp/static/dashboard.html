@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarWash Cloud — панель управления</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="/static/css/theme-plata.css?v=glass2">
+<link rel="stylesheet" href="/static/css/ui.css?v=pro1">
+<link rel="stylesheet" href="/static/css/theme-cloud.css?v=cloud1">
+</head>
+<body>
+<div class="shell">
+  <div class="rail" id="sidebarRoot"></div>
+
+  <div class="main">
+    <div class="err-banner" id="errBanner" style="display:none"></div>
+
+    <div class="page-head">
+      <div>
+        <div class="page-title">Дашборд</div>
+        <div class="page-sub" id="pageSub">—</div>
+      </div>
+      <div class="head-actions">
+        <button class="btn ghost" id="exportBtn"><i class="ti ti-download"></i>Экспорт PDF</button>
+        <button class="btn white" id="addCarBtn"><i class="ti ti-plus"></i>Добавить машину</button>
+      </div>
+    </div>
+
+    <div class="g12" style="margin-top:0">
+      <!-- выручка, график по часам, сплит оплат -->
+      <div class="card c7">
+        <div class="kpis">
+          <div class="kpi"><div class="eyebrow">Выручка за смену</div><div class="big">₽<span id="kRevenue" data-count="0">0</span></div></div>
+          <div class="kpi"><div class="eyebrow">Средний чек</div><div class="big"><span id="kAvg" data-count="0">0</span><span class="cur">₽</span></div></div>
+          <div class="kpi"><div class="eyebrow">Машин за смену</div><div class="big"><span id="kCars" data-count="0">0</span></div></div>
+        </div>
+        <div class="cchart" id="chart"></div>
+        <div class="csplit">
+          <div><div class="lab"><span>Наличные</span><span id="pCash">0%</span></div><div class="ctrack"><i id="tCash" style="width:0;--c:var(--cyan)"></i></div><div class="stack" id="stk1"></div></div>
+          <div><div class="lab"><span>Безналичные</span><span id="pBez">0%</span></div><div class="ctrack"><i id="tBez" style="width:0;--c:var(--blue)"></i></div><div class="stack" id="stk2"></div></div>
+          <div><div class="lab"><span>Visa</span><span id="pVisa">0%</span></div><div class="ctrack"><i id="tVisa" style="width:0;--c:var(--violet)"></i></div><div class="stack" id="stk3"></div></div>
+        </div>
+      </div>
+
+      <!-- касса -->
+      <div class="card c5">
+        <div class="cashc">
+          <div class="top2">
+            <div><div class="eyebrow">Остаток в кассе</div><div class="big">₽<span id="kRemainder" data-count="0">0</span></div></div>
+            <span class="cchip"><i class="ti ti-trending-up" style="font-size:14px"></i>после расходов</span>
+          </div>
+          <div style="margin-top:22px" class="inner">
+            <div style="display:flex;justify-content:space-between;padding:16px 18px;font-size:13px;font-weight:700;color:var(--t2)"><span>Зарплаты к выплате</span><b style="color:#fff" id="kSalaries">—</b></div>
+            <div style="height:1px;background:var(--line)"></div>
+            <div style="display:flex;justify-content:space-between;padding:16px 18px;font-size:13px;font-weight:700;color:var(--t2)"><span>Расходы за смену</span><b style="color:#fff" id="kExpenses">—</b></div>
+          </div>
+          <div class="pays" id="pays">
+            <button class="cpay on" data-m="нал"><small>Наличные</small><b id="payCash">—</b></button>
+            <button class="cpay" data-m="безнал"><small>Безнал</small><b id="payBez">—</b></button>
+            <button class="cpay" data-m="visa"><small>Visa</small><b id="payVisa">—</b></button>
+            <button class="btn white" id="cashBtn">Касса</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="lbl">Фильтры</div>
+      <label class="sel"><select id="empSel"><option value="">Все сотрудники</option></select><i class="ti ti-chevron-down" style="font-size:16px"></i></label>
+      <label class="sel grow"><input id="q" placeholder="Поиск по номеру или марке"><i class="ti ti-search" style="font-size:18px"></i></label>
+    </div>
+
+    <div class="sheet">
+      <div class="sheet-tabs" id="tabs"><span class="ind"></span></div>
+      <div>
+        <div class="sh-head"><span>Машины за смену</span><span id="cnt" style="color:var(--mut)"></span></div>
+        <div class="sh-list" id="list"></div>
+      </div>
+      <div class="sh-det" id="det"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/site-common.js"></script>
+<script>
+if (CW.requireAuth()) {
+  CW.renderSidebar("dashboard");
+
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const fmt = n => Math.round(n || 0).toLocaleString("ru-RU");
+  const money = n => fmt(n) + " ₽";
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const PALETTE = ["#5BD6FF", "#A99CFF", "#4ADE9C", "#FF8F85", "#FFC46B", "#2F6BFF"];
+  function empColor(name) { let h = 0; for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % PALETTE.length; return PALETTE[h]; }
+  const avatar = (n, z) => `<div class="av" style="background:${empColor(n || "")}${z ? `;width:${z}px;height:${z}px;font-size:${Math.round(z * .36)}px` : ""}">${esc(CW.initials(n || "—"))}</div>`;
+
+  /* способ оплаты → ключ вкладки */
+  function methodKey(m) {
+    m = (m || "").toLowerCase();
+    if (m.includes("виз") || m === "visa") return "visa";
+    if (m.includes("безнал") || m.includes("петрон") || m.includes("petron") || m === "transfer") return "безнал";
+    return "нал";
+  }
+  const methodLabel = { "нал": "Наличные", "безнал": "Безнал", "visa": "Visa" };
+  const carMethods = c => c.payment_split ? [...new Set(Object.keys(c.payment_split).filter(k => c.payment_split[k]).map(methodKey))] : [methodKey(c.payment)];
+
+  let cars = [], session = {}, summary = {}, loyaltyByCar = {};
+  let filter = "all", sel = null;
+
+  /* ---------- график по часам ---------- */
+  function renderChart() {
+    const byHour = {};
+    cars.forEach(c => { const h = parseInt((c.time || "").split(":")[0], 10); if (!isNaN(h)) byHour[h] = (byHour[h] || 0) + (c.price || 0); });
+    const hs = Object.keys(byHour).map(Number);
+    let lo = hs.length ? Math.min(...hs) : 9, hi = hs.length ? Math.max(...hs) : 20;
+    lo = Math.min(lo, 9); hi = Math.max(hi, lo + 9);
+    const arr = []; for (let h = lo; h <= hi; h++) arr.push([h, byHour[h] || 0]);
+    const max = Math.max(1, ...arr.map(a => a[1]));
+    const peak = arr.reduce((m, a) => a[1] > m[1] ? a : m, arr[0])[0];
+    $("#chart").innerHTML = arr.map(([h, v], i) => {
+      const px = Math.max(4, Math.round(v / max * 120));
+      return `<div class="cbar ${h === peak && v > 0 ? "now" : ""}" style="--d:${i};--h:${px}px"><em>${String(h).padStart(2, "0")}:00 · ${money(v)}</em><i style="height:${px}px"></i><span>${String(h).padStart(2, "0")}</span></div>`;
+    }).join("");
+  }
+
+  /* ---------- сплит оплат + стопки аватаров ---------- */
+  function renderSplit() {
+    const tot = (summary.cash || 0) + (summary.beznal || 0) + (summary.visa || 0) || 1;
+    const set = (id, tid, v) => { const p = Math.round(v / tot * 100); $(id).textContent = p + "%"; $(tid).style.width = p + "%"; };
+    set("#pCash", "#tCash", summary.cash || 0); set("#pBez", "#tBez", summary.beznal || 0); set("#pVisa", "#tVisa", summary.visa || 0);
+    const who = k => [...new Set(cars.filter(c => carMethods(c).includes(k)).map(c => c.employee))].slice(0, 5);
+    $("#stk1").innerHTML = who("нал").map(n => avatar(n)).join("");
+    $("#stk2").innerHTML = who("безнал").map(n => avatar(n)).join("");
+    $("#stk3").innerHTML = who("visa").map(n => avatar(n)).join("");
+    $("#payCash").textContent = money(summary.cash); $("#payBez").textContent = money(summary.beznal); $("#payVisa").textContent = money(summary.visa);
+  }
+
+  /* ---------- вкладки / список / детали ---------- */
+  const tabsDef = [["all", "Все"], ["нал", "Наличные"], ["безнал", "Безнал"], ["visa", "Visa"]];
+  function visible() {
+    const q = $("#q").value.trim().toLowerCase(), emp = $("#empSel").value;
+    return cars.slice().reverse().filter(c => (filter === "all" || carMethods(c).includes(filter)) && (!emp || c.employee === emp) &&
+      ((c.car || "") + " " + (c.num || "") + " " + (c.service || "")).toLowerCase().includes(q));
+  }
+  function renderTabs() {
+    const t = $("#tabs"); $$("button", t).forEach(b => b.remove());
+    tabsDef.forEach(([k, n]) => {
+      const c = k === "all" ? cars.length : cars.filter(x => carMethods(x).includes(k)).length;
+      const b = document.createElement("button"); b.className = k === filter ? "on" : ""; b.innerHTML = `${n}<b>${c}</b>`;
+      b.onclick = () => { filter = k; renderTabs(); renderList(); }; t.append(b);
+    });
+    moveTabInd();
+  }
+  function moveTabInd() { const t = $("#tabs"), b = $("button.on", t), i = $(".ind", t); if (!b) return; i.style.width = b.offsetWidth + "px"; i.style.transform = `translateX(${b.offsetLeft}px)`; }
+  function renderList() {
+    const arr = visible();
+    if (!arr.find(c => c.num === sel)) sel = arr.length ? arr[0].num : null;
+    $("#cnt").textContent = arr.length + " из " + cars.length;
+    $("#list").innerHTML = arr.map((c, k) => {
+      const ms = carMethods(c);
+      const st = c.payment_split ? "work" : ms[0] === "нал" ? "done" : ms[0] === "visa" ? "work" : "wait";
+      const lbl = c.payment_split ? "Раздельно" : methodLabel[ms[0]];
+      return `<div class="sh-row ${c.num === sel ? "on" : ""}" data-id="${esc(c.num)}" style="--k:${Math.min(k, 12)}">${avatar(c.employee)}<div class="info"><b>${esc(c.car || "—")}</b><small>№${esc(c.num)} · ${esc(c.time || "")} · ${esc(c.employee || "")}</small></div><div class="sum">${money(c.price)}<small><span class="st ${st}">${lbl}</span></small></div></div>`;
+    }).join("") || '<div class="sh-empty">Машин пока нет</div>';
+    $$(".sh-row").forEach(r => r.onclick = () => { sel = +r.dataset.id; $$(".sh-row").forEach(x => x.classList.toggle("on", x === r)); renderDet(); });
+    renderDet();
+  }
+  function renderDet() {
+    const c = cars.find(x => x.num === sel);
+    if (!c) { $("#det").innerHTML = '<div class="sh-empty" style="color:var(--t3);margin:auto">Выберите машину из списка</div>'; return; }
+    const bd = c.price_breakdown && Object.keys(c.price_breakdown).length ? Object.entries(c.price_breakdown).map(([k, v]) => [k, v.price]) : [[c.service || "Услуга", c.price]];
+    const disc = loyaltyByCar[c.num] || 0;
+    const pay = c.payment_split ? Object.entries(c.payment_split).filter(([, v]) => v).map(([k, v]) => `${k} ${fmt(v)}`).join(" + ") : (methodLabel[methodKey(c.payment)] || c.payment);
+    $("#det").innerHTML = `<div class="swap" style="display:flex;flex-direction:column;gap:20px;height:100%;flex:1">
+      <div class="det-top"><div><div class="eyebrow">Заказ</div><h3><span>#</span>${esc(c.num)}</h3></div><div><div class="eyebrow">Автомобиль</div><div class="v">${esc(c.car || "—")}</div></div><div><div class="eyebrow">Сотрудник</div><div class="v">${avatar(c.employee, 30)}${esc(c.employee || "—")}</div></div></div>
+      <div class="sh-svc">${bd.map(([k, v], i) => `<div class="inner" style="animation-delay:${i * 80}ms"><b>${fmt(v)}<span class="cur"> ₽</span></b><small>${esc(k)}</small></div>`).join("")}<div class="inner add" id="addsvc" title="Открыть в разделе «Машины»"><i class="ti ti-plus" style="font-size:22px"></i></div></div>
+      <div class="inner" style="display:flex;align-items:center;gap:14px;padding:14px 18px;animation:rise .6s var(--ease) .3s both"><div class="av" style="background:var(--violet);width:40px;height:40px"><i class="ti ti-clock" style="font-size:18px"></i></div><div style="flex:1"><b style="font-size:14px">Принята в ${esc(c.time || "—")}</b><div style="font-size:12px;color:var(--t3);font-weight:600;margin-top:2px">${esc(c.service || "")}${c.comment ? " · " + esc(c.comment) : ""}</div></div></div>
+      <div class="sh-tot"><div><small>Подытог</small><b>${money(c.price)}</b></div><div><small>${disc ? "Скидка" : "Оплата"}</small><b>${disc ? "−" + money(disc) : esc(pay)}</b></div><div><small>Получено</small><b>${money(c.price - disc)}</b></div>
+      <button class="btn cyan" id="editBtn"><i class="ti ti-pencil"></i>Изменить</button></div></div>`;
+    $("#addsvc").onclick = $("#editBtn").onclick = () => { window.location.href = "/static/cars.html"; };
+  }
+
+  async function load() {
+    const errEl = $("#errBanner"); errEl.style.display = "none";
+    const branch = CW.getActiveBranch();
+    if (!branch) { errEl.textContent = "Филиал не выбран. Выберите филиал в шапке."; errEl.style.display = "block"; return; }
+    $("#exportBtn").onclick = () => CW.downloadFile(`/api/reports/pdf?branch=${encodeURIComponent(branch)}`, `Касса_${branch}.pdf`).catch(e => { errEl.textContent = e.message; errEl.style.display = "block"; });
+    $("#addCarBtn").onclick = $("#cashBtn").onclick = () => { window.location.href = "/static/cars.html"; };
+    $("#cashBtn").onclick = () => { window.location.href = "/static/cash.html"; };
+    $$(".cpay").forEach(p => p.onclick = () => { $$(".cpay").forEach(x => x.classList.toggle("on", x === p)); filter = p.dataset.m; renderTabs(); renderList(); });
+    $("#q").oninput = renderList; $("#empSel").onchange = renderList;
+    try {
+      const data = await CW.authFetch(`/api/session?branch=${encodeURIComponent(branch)}`);
+      session = data.session || {}; summary = data.summary || {}; cars = session.cars || [];
+      (session.loyalty || []).forEach(l => loyaltyByCar[l.car_num] = (loyaltyByCar[l.car_num] || 0) + l.discount);
+      const totalSalaries = Object.values(summary.washer_salaries || {}).reduce((a, b) => a + b, 0) + (summary.admin_salary || 0);
+      $("#pageSub").innerHTML = `<b>${esc(branch)}</b> · ${esc(CW.todayLabel())} · ${cars.length} машин`;
+      $("#kRevenue").dataset.count = summary.grand_total || 0;
+      $("#kAvg").dataset.count = cars.length ? Math.round((summary.total || 0) / cars.length) : 0;
+      $("#kCars").dataset.count = cars.length;
+      $("#kRemainder").dataset.count = summary.remainder || 0;
+      $("#kSalaries").textContent = money(totalSalaries); $("#kExpenses").textContent = money(summary.total_expenses);
+      CW.runCounts();
+      [...new Set(cars.map(c => c.employee).filter(Boolean))].forEach(n => $("#empSel").insertAdjacentHTML("beforeend", `<option value="${esc(n)}">${esc(n)}</option>`));
+      renderChart(); renderSplit(); renderTabs(); renderList();
+    } catch (e) {
+      errEl.textContent = e.message || "Не удалось загрузить данные"; errEl.style.display = "block";
+      renderTabs(); renderList();
+    }
+  }
+  window.addEventListener("resize", moveTabInd);
+  document.fonts && document.fonts.ready.then(moveTabInd);
+  load();
+}
+</script>
+</body>
+</html>
