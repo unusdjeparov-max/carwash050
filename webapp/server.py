@@ -10,7 +10,7 @@ Backend Mini App для CarWash-бота.
 Для Telegram Mini App нужен публичный HTTPS-адрес (ngrok / Render / Railway),
 см. README в этой папке.
 """
-import sys, os, hashlib, hmac, json, tempfile, asyncio
+import sys, os, re, hashlib, hmac, json, tempfile, asyncio
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List
 from urllib.parse import parse_qsl

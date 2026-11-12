@@ -425,3 +425,12 @@ table.week th,table.week td{border-color:var(--line);color:#fff}
 .popover-panel{background:linear-gradient(160deg,#16275A,#0A1433)!important;border:1px solid var(--line2)!important;border-radius:26px!important;box-shadow:0 30px 60px -20px rgba(0,0,0,.8)!important}
 .bf-item,.zoom-opt{border-radius:16px;background:rgba(255,255,255,.05);border:1px solid var(--line)}.bf-item.checked,.zoom-opt.active{border-color:var(--cyan);background:rgba(91,214,255,.12)}
 .add-menu-item:hover{background:rgba(255,255,255,.08)}
+
+/* ---------- чекбокс услуги в модалке: компактный, а не «растянутый» input ---------- */
+.svc-item{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;font-size:13px;font-weight:700}
+.svc-item input[type=checkbox]{flex:none;width:18px;height:18px;min-width:18px;padding:0;margin:0;border-radius:6px;accent-color:var(--cyan);box-shadow:none}
+.svc-item{text-transform:none;letter-spacing:0;color:#fff;margin:0;line-height:1.25;min-height:46px}
+.svc-item input[type=checkbox]{margin:0!important;align-self:center;appearance:auto;-webkit-appearance:checkbox;background:transparent;border:0}
+.modal .field .svc-item,.field .svc-item{display:flex;text-transform:none;letter-spacing:0;font-size:13px;font-weight:700;color:#fff;margin:0;padding:12px 14px}
+.modal .field .svc-item input[type=checkbox],.field .svc-item input[type=checkbox]{width:18px!important;height:18px!important;min-width:18px;padding:0;margin:0!important;border:0;background:transparent;box-shadow:none;border-radius:4px}
+.svc-item.checked{background:rgba(91,214,255,.14);border-color:var(--cyan)}

@@ -1169,11 +1169,11 @@ async function renderHome(){
   const moreTeam=workers.length>6?`<div class="home-member more" onclick="switchTab('workers')"><div class="av"><i class="ti ti-dots"></i></div><div class="nm">Ещё</div></div>`:"";
 
   const recentRows=session.cars.length?session.cars.slice().reverse().slice(0,4).map(c=>{
-    const paid=c.payment!=="Долг"&&c.payment!=="unpaid";
+    const paid=c.status==="done";
     return `<div class="row" onclick="switchTab('cash')">
       <div class="home-row-ic"><i class="ti ti-car"></i></div>
       <div class="home-row-mid"><div class="home-row-title">${c.num||c.brand||"Машина"}${c.service?" · "+c.service:""}</div><div class="home-row-sub">${c.washer||""}${c.time?" · "+c.time:""}</div></div>
-      <div class="home-row-right"><div class="home-row-price">${fmt(c.total||0)}</div><span class="pill ${paid?"ok":"wip"}">${paid?"Оплачено":"В работе"}</span></div>
+      <div class="home-row-right"><div class="home-row-price">${fmt(c.price||c.total||0)}</div><span class="pill ${paid?"ok":"wip"}">${paid?"Оплачено":"В работе"}</span></div>
     </div>`;
   }).join(""):"";
 
@@ -2427,7 +2427,7 @@ async function renderFinance(){
               <span class="expense-del" onclick="delIncome(${i})">Удалить</span>
             </div>
           </div>`).join("")
-        :emptyState("ti-cash","Доходов пока нет",{label:"Добавить доход",onclick:"uiAddIncome()"})}
+        :emptyState("ti-cash","Доходов пока нет")}
     </div>
     <div class="btn-wrap"><button class="btn secondary btn-sm" onclick="uiAddIncome()"><i class="ti ti-plus"></i>Добавить доход</button></div>
     <div class="btn-wrap"><button class="btn btn-sm" onclick="switchTab('reports')"><i class="ti ti-chart-bar"></i>Отчёты за период</button></div>
