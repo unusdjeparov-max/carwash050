@@ -22,6 +22,7 @@
         <div class="page-sub" id="pageSub">—</div>
       </div>
       <div class="head-actions">
+        <button class="btn ghost sq" id="filtBtn" title="Фильтры"><i class="ti ti-adjustments-horizontal"></i></button>
         <button class="btn ghost" id="exportBtn"><i class="ti ti-download"></i>Экспорт PDF</button>
         <button class="btn white" id="addCarBtn"><i class="ti ti-plus"></i>Добавить машину</button>
       </div>
@@ -66,7 +67,7 @@
     </div>
 
     <div class="filters">
-      <div class="lbl">Фильтры</div>
+      <div class="lbl">Активные фильтры <s id="fCnt">0</s></div>
       <label class="sel"><select id="empSel"><option value="">Все сотрудники</option></select><i class="ti ti-chevron-down" style="font-size:16px"></i></label>
       <label class="sel grow"><input id="q" placeholder="Поиск по номеру или марке"><i class="ti ti-search" style="font-size:18px"></i></label>
     </div>
@@ -153,7 +154,12 @@ if (CW.requireAuth()) {
     moveTabInd();
   }
   function moveTabInd() { const t = $("#tabs"), b = $("button.on", t), i = $(".ind", t); if (!b) return; i.style.width = b.offsetWidth + "px"; i.style.transform = `translateX(${b.offsetLeft}px)`; }
+  function updFilterCount() {
+    const n = ($("#empSel").value ? 1 : 0) + ($("#q").value.trim() ? 1 : 0) + (filter !== "all" ? 1 : 0);
+    const el = $("#fCnt"); if (el) { el.textContent = n; el.style.opacity = n ? 1 : .45; }
+  }
   function renderList() {
+    updFilterCount();
     const arr = visible();
     if (!arr.find(c => c.num === sel)) sel = arr.length ? arr[0].num : null;
     $("#cnt").textContent = arr.length + " из " + cars.length;
@@ -189,13 +195,14 @@ if (CW.requireAuth()) {
     $("#addCarBtn").onclick = $("#cashBtn").onclick = () => { window.location.href = "/static/cars.html"; };
     $("#cashBtn").onclick = () => { window.location.href = "/static/cash.html"; };
     $$(".cpay").forEach(p => p.onclick = () => { $$(".cpay").forEach(x => x.classList.toggle("on", x === p)); filter = p.dataset.m; renderTabs(); renderList(); });
+    $("#filtBtn").onclick = () => { $(".filters").scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => $("#q").focus(), 350); };
     $("#q").oninput = renderList; $("#empSel").onchange = renderList;
     try {
       const data = await CW.authFetch(`/api/session?branch=${encodeURIComponent(branch)}`);
       session = data.session || {}; summary = data.summary || {}; cars = session.cars || [];
       (session.loyalty || []).forEach(l => loyaltyByCar[l.car_num] = (loyaltyByCar[l.car_num] || 0) + l.discount);
       const totalSalaries = Object.values(summary.washer_salaries || {}).reduce((a, b) => a + b, 0) + (summary.admin_salary || 0);
-      $("#pageSub").innerHTML = `<b>${esc(branch)}</b> · ${esc(CW.todayLabel())} · ${cars.length} машин`;
+      $("#pageSub").innerHTML = `<b>${esc(branch)}</b> · ${esc(CW.weekdayDateLabel())} · ${cars.length} машин`;
       $("#kRevenue").dataset.count = summary.grand_total || 0;
       $("#kAvg").dataset.count = cars.length ? Math.round((summary.total || 0) / cars.length) : 0;
       $("#kCars").dataset.count = cars.length;

@@ -248,55 +248,67 @@ const CW = (() => {
     const role = getRole();
     const items = [].concat(...NAV.map(g => g.items)).filter(it =>
       (!it.ownerOnly || role === "владелец") && (!it.adminOnly || role === "админ" || role === "владелец"));
-
-    let prevKey = null, prevPos = null;
-    try { prevKey = sessionStorage.getItem("cw_nav_key"); prevPos = JSON.parse(sessionStorage.getItem("cw_nav_ind") || "null"); } catch (e) {}
-    const firstPaint = !root.dataset.painted;
-    const startKey = (firstPaint && prevKey && items.some(i => i.key === prevKey)) ? prevKey : activeKey;
+    const byKey = {}; items.forEach(it => { byKey[it.key] = it; });
+    /* Раскладка шапки — как в концепте: две круглые кнопки (Запись, Касса), «таблетка» из трёх
+       основных разделов, кнопка «Сотрудники»; остальные разделы — в меню справа. */
+    const PILL = ["dashboard", "cars", "reports"], LEFT = ["booking", "cash"], RIGHT = ["workers"];
+    const MORE = ["clients", "loyalty", "finance", "history", "branches", "settings"];
+    const pick = ks => ks.map(k => byKey[k]).filter(Boolean);
+    const icoBtn = it => `<a class="icobtn${it.key === activeKey ? " on" : ""}" href="${it.href}" data-key="${it.key}" title="${it.label}"><i class="ti ${it.icon}" style="font-size:20px"></i></a>`;
+    const moreItems = pick(MORE);
     const branch = getActiveBranch();
 
     root.innerHTML = `
       <header class="top">
         <div class="brand" id="brandBtn"><div class="lg">${DROP_SVG}</div>CarWash</div>
-        <nav class="nav" id="cwNav"><span class="ind nt"></span>
-          ${items.map(it => `<a data-href="${it.href}" data-key="${it.key}" title="${it.label}" class="${it.key === startKey ? "on" : ""}"><i class="ti ${it.icon}" style="font-size:20px"></i><span>${it.label}</span></a>`).join("")}
+        ${pick(LEFT).map(icoBtn).join("")}
+        <nav class="nav labeled" id="cwNav"><span class="ind nt"></span>
+          ${pick(PILL).map(it => `<a href="${it.href}" data-key="${it.key}" title="${it.label}" class="${it.key === activeKey ? "on" : ""}"><i class="ti ${it.icon}" style="font-size:20px"></i><span>${it.label}</span></a>`).join("")}
         </nav>
+        ${pick(RIGHT).map(icoBtn).join("")}
         <div class="gap"></div>
         <div class="branch${role === "владелец" ? "" : " no-click"}" id="branchSelect" title="Филиал">
           <i class="ti ti-map-pin" style="font-size:16px"></i><span id="bsValueFull">${branch || "Филиал не выбран"}</span>
           ${role === "владелец" ? `<svg class="i" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>` : ""}
         </div>
+        ${moreItems.length ? `<div class="morewrap">
+          <button class="icobtn${MORE.includes(activeKey) ? " on" : ""}" id="moreBtn" title="Все разделы"><i class="ti ti-layout-grid" style="font-size:20px"></i></button>
+          <div class="more-pop" id="morePop">${moreItems.map(it => `<a href="${it.href}" data-key="${it.key}" class="${it.key === activeKey ? "on" : ""}"><i class="ti ${it.icon}"></i><span>${it.label}</span></a>`).join("")}</div>
+        </div>` : ""}
         <button class="icobtn" id="logoutBtn" title="Выйти"><i class="ti ti-logout" style="font-size:19px"></i></button>
         <div class="who" title="${getName() || "—"} · ${roleLabel(role)}"><div class="av">${initials(getName())}</div><div><b>${getName() || "—"}</b><small>${roleLabel(role) || ""}</small></div></div>
       </header>`;
     root.dataset.painted = "1";
 
+    /* индикатор «таблетки»: едет с пункта прошлой страницы на текущий */
     const nav = root.querySelector("#cwNav"), ind = nav.querySelector(".ind");
     const links = [...nav.querySelectorAll("a")];
-    const COLLAPSED = 46, GAP = 2, PAD = 6;
-    const posFor = (key) => {           // x и ширина индикатора для пункта (в «финальном» состоянии)
-      const idx = links.findIndex(a => a.dataset.key === key);
-      if (idx < 0) return null;
-      const lab = links[idx].querySelector("span");
-      return { x: PAD + idx * (COLLAPSED + GAP), w: 40 + 20 + 8 + (lab ? lab.scrollWidth : 0) };
-    };
-    const place = (p) => { if (!p) { ind.style.opacity = 0; return; } ind.style.opacity = 1; ind.style.width = p.w + "px"; ind.style.transform = `translateX(${p.x}px)`; };
-    const target = posFor(activeKey);
-    const apply = () => {
-      links.forEach(a => a.classList.toggle("on", a.dataset.key === activeKey));
-      ind.classList.remove("nt"); place(target);
-      const act = links.find(a => a.dataset.key === activeKey);
-      if (act && target) nav.scrollTo({ left: Math.max(0, target.x - 24), behavior: "smooth" });
-    };
-    if (startKey !== activeKey) {
-      const sp = posFor(startKey) || prevPos; place(sp); void ind.offsetWidth;
-      requestAnimationFrame(() => requestAnimationFrame(apply));
-    } else { place(target); void ind.offsetWidth; ind.classList.remove("nt"); }
-    try { sessionStorage.setItem("cw_nav_key", activeKey); if (target) sessionStorage.setItem("cw_nav_ind", JSON.stringify(target)); } catch (e) {}
+    const posFor = (key) => { const a = links.find(x => x.dataset.key === key); return a ? { x: a.offsetLeft, w: a.offsetWidth } : null; };
+    const place = (pos) => { if (!pos) { ind.style.opacity = 0; return; } ind.style.opacity = 1; ind.style.width = pos.w + "px"; ind.style.transform = `translateX(${pos.x}px)`; };
+    const markOn = (key) => links.forEach(a => a.classList.toggle("on", a.dataset.key === key));
+    let prevKey = null;
+    try { prevKey = sessionStorage.getItem("cw_nav_key"); } catch (e) {}
+    const settle = () => { markOn(activeKey); ind.classList.remove("nt"); place(posFor(activeKey)); };
+    if (prevKey && prevKey !== activeKey && posFor(prevKey) && posFor(activeKey)) {
+      markOn(prevKey); place(posFor(prevKey)); void ind.offsetWidth;
+      requestAnimationFrame(() => requestAnimationFrame(settle));
+    } else { markOn(activeKey); place(posFor(activeKey)); void ind.offsetWidth; ind.classList.remove("nt"); }
+    const snap = () => { ind.classList.add("nt"); place(posFor(activeKey)); void ind.offsetWidth; ind.classList.remove("nt"); };
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(snap);
+    window.addEventListener("resize", snap);
+    try { sessionStorage.setItem("cw_nav_key", activeKey); } catch (e) {}
 
-    links.forEach(a => a.addEventListener("click", () => { if (a.dataset.key !== activeKey) window.location.href = a.dataset.href; }));
+    root.querySelectorAll("a[href]").forEach(a => a.addEventListener("click", (e) => { if (a.dataset.key === activeKey) e.preventDefault(); }));
     root.querySelector("#brandBtn").addEventListener("click", () => { window.location.href = "/static/dashboard.html"; });
     root.querySelector("#logoutBtn").addEventListener("click", logout);
+
+    /* меню «Все разделы» */
+    const moreBtn = root.querySelector("#moreBtn"), morePop = root.querySelector("#morePop");
+    if (moreBtn && morePop) {
+      moreBtn.addEventListener("click", (e) => { e.stopPropagation(); morePop.classList.toggle("open"); });
+      document.addEventListener("click", () => morePop.classList.remove("open"));
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape") morePop.classList.remove("open"); });
+    }
 
     // ---------- попап выбора филиала (владелец) ----------
     if (role === "владелец") {
@@ -368,11 +380,15 @@ const CW = (() => {
     return new Date().toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
   }
 
+  function weekdayDateLabel() {
+    return new Date().toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).replace(/\s*г\.$/, "");
+  }
+
   return {
     getToken, getName, getRole, getLoginBranch,
     getActiveBranch, setActiveBranch,
     requireAuth, authFetch, downloadFile, logout,
-    renderSidebar, initials, roleLabel, money, todayLabel, toast, countUp, runCounts,
+    renderSidebar, initials, roleLabel, money, todayLabel, weekdayDateLabel, toast, countUp, runCounts,
     getCalDate, setCalDate, onCalDateSelect,
   };
 })();
