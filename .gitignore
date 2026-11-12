@@ -7,3 +7,4 @@ carwash_archive.json
 carwash_branches.json
 carwash_users.json
 *.lock
+history.json
