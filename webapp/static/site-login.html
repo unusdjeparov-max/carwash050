@@ -5,114 +5,68 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CarWash Cloud — вход</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="/static/css/theme-plata.css?v=glass2">
+<link rel="stylesheet" href="/static/css/theme-cloud.css?v=cloud2">
 <style>
-/* Экран входа не использует .shell/.rail (сайдбара тут нет),
-   поэтому свёрстан отдельно, но берёт цвета/шрифты из общей
-   темы theme-plata.css. Раньше зависел от старой темы
-   site-theme.css (удалена) — тут только докидываем
-   несколько токенов, которых не было в общей теме
-   (боковая панель формы входа тёмная, «чёрная», а не оранжевая). */
-:root{
-  --sidebar-bg:#1A1A1A;
-  --sidebar-bg-2:#0D0D0D;
-  --input-text:var(--ink);
-  --radius-sm:var(--r-sm);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-  font-family:var(--font-body);
-  min-height:100vh;
-  display:flex;align-items:center;justify-content:center;
-  -webkit-font-smoothing:antialiased;
-  position:relative;overflow:hidden;padding:24px;
-  background:
-    radial-gradient(60% 50% at 12% 8%, rgba(255,255,255,.10), transparent 60%),
-    radial-gradient(55% 45% at 92% 96%, rgba(31,107,255,.35), transparent 60%),
-    linear-gradient(160deg, var(--sidebar-bg) 0%, var(--sidebar-bg-2) 100%);
-}
-/* лёгкий узор из капель — чисто CSS, без картинок */
-body::before{
-  content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
-  background-image:radial-gradient(rgba(255,255,255,.16) 1.6px, transparent 1.6px);
-  background-size:26px 26px;
-  mask-image:radial-gradient(70% 60% at 50% 20%, #000 0%, transparent 70%);
-}
+/* Экран входа в стиле «Cloud»: тёмная сцена + белая «бумажная» форма.
+   Все классы в неймспейсе .lg-*, чтобы не пересекаться с общей темой. */
+html,body{height:100%}
+body.lg-page{display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden;position:relative}
+.lg-wrap{position:relative;z-index:1;width:100%;max-width:940px;display:grid;grid-template-columns:340px 1fr;border-radius:36px;overflow:hidden;
+  background:#fff;box-shadow:0 50px 100px -40px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.06);animation:rise .8s var(--ease) both}
+.lg-side{position:relative;overflow:hidden;padding:36px 32px;color:#fff;display:flex;flex-direction:column;min-height:520px;
+  background:linear-gradient(160deg,#16275A 0%,#0A1433 70%)}
+.lg-side::before{content:"";position:absolute;width:340px;height:340px;right:-120px;bottom:-130px;border-radius:50%;
+  background:radial-gradient(circle,rgba(91,214,255,.45),transparent 65%);animation:float 7s ease-in-out infinite}
+.lg-side::after{content:"";position:absolute;width:260px;height:260px;left:-100px;top:-90px;border-radius:50%;
+  background:radial-gradient(circle,rgba(47,107,255,.55),transparent 65%)}
+.lg-side>*{position:relative;z-index:1}
+.lg-brand{display:flex;align-items:center;gap:10px;font-family:var(--font-brand);font-weight:600;font-size:15px}
+.lg-logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#2F6BFF,#1F4FD8);display:grid;place-items:center;
+  box-shadow:0 8px 24px -8px rgba(47,107,255,.9);font-size:21px;color:#fff}
+.lg-side h2{font-family:var(--font-display);font-weight:500;font-size:40px;line-height:1.02;letter-spacing:-.04em;margin-top:56px}
+.lg-side p{font-size:13.5px;line-height:1.6;color:var(--t2);margin-top:16px;max-width:240px;font-weight:600}
+.lg-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+.lg-chip{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 14px;border-radius:999px;font-size:12px;font-weight:700;
+  background:rgba(255,255,255,.07);border:1px solid var(--line2);color:var(--t2)}
+.lg-chip i.live{width:8px;height:8px;border-radius:50%;background:var(--cyan);animation:pulse 1.8s infinite}
 
-.wrap{position:relative;z-index:1;width:100%;max-width:880px;display:flex;align-items:stretch;
-  background:#fff;border-radius:32px;overflow:hidden;box-shadow:0 40px 80px -30px rgba(8,15,40,.55)}
-
-.side{
-  width:300px;flex-shrink:0;padding:36px 30px;color:#fff;position:relative;overflow:hidden;
-  background:linear-gradient(165deg, var(--sidebar-bg) 0%, var(--sidebar-bg-2) 100%);
-  display:flex;flex-direction:column;
-}
-.side::after{
-  content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:-90px;bottom:-100px;
-  background:radial-gradient(circle, rgba(31,107,255,.30), transparent 65%);
-}
-.side .mark{width:44px;height:44px;border-radius:14px;background:var(--orange-grad);
-  display:flex;align-items:center;justify-content:center;font-size:21px;margin-bottom:22px}
-.side h2{font-family:var(--font-display);font-weight:700;font-size:26px;line-height:1.08;letter-spacing:-.01em}
-.side p{font-size:12.5px;line-height:1.55;color:rgba(255,255,255,.78);margin-top:12px;max-width:210px}
-.side .foot{margin-top:auto;font-size:11px;color:rgba(255,255,255,.55);font-weight:600;letter-spacing:.03em;text-transform:uppercase}
-
-.card{flex:1;padding:40px 40px 34px;position:relative}
-.brand-row{display:flex;align-items:center;gap:9px;margin-bottom:26px}
-.brand-row .dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
-.brand-row span{font-size:11.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
-
-h1{font-family:var(--font-display);font-size:22px;font-weight:700;margin-bottom:4px;color:var(--text)}
-.sub{font-size:12.5px;color:var(--text-secondary);margin-bottom:22px}
-
-label{font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin:16px 0 7px}
-input,select{
-  width:100%;height:44px;border-radius:var(--radius-sm);background:var(--surface-2);
-  border:1px solid var(--border-strong);color:var(--input-text);font-size:14px;
-  padding:0 14px;font-family:inherit;
-}
-input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
-
-.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:7px}
-.role-btn{
-  height:42px;border-radius:100px;background:var(--surface-2);border:1px solid var(--border-strong);
-  color:var(--text-secondary);font-size:12.5px;font-weight:700;cursor:pointer;transition:all .12s;
-}
-.role-btn.active{background:var(--accent-gradient);color:#fff;border-color:transparent;box-shadow:0 6px 16px -6px rgba(31,107,255,.45)}
-
-.btn-submit{
-  width:100%;height:46px;border-radius:100px;border:none;
-  background:var(--accent-gradient);color:#fff;
-  box-shadow:0 10px 22px -8px rgba(31,107,255,.5);
-  font-size:14px;font-weight:700;margin-top:22px;cursor:pointer;transition:opacity .12s,transform .08s;
-}
-.btn-submit:hover{opacity:.94}
-.btn-submit:active{transform:scale(.98)}
-.btn-submit:disabled{opacity:.5;cursor:default}
-
-.error{
-  margin-top:12px;background:var(--red-tint);color:var(--red);font-size:12.5px;font-weight:600;
-  padding:10px 13px;border-radius:12px;display:none;
-}
-.branch-field{display:none}
-
-@media(max-width:720px){ .side{display:none} .card{padding:32px 26px} }
+.lg-form{padding:46px 48px 40px;color:var(--ink-d)}
+.lg-form h1{font-family:var(--font-display);font-size:34px;font-weight:500;letter-spacing:-.035em;color:var(--ink-d);line-height:1}
+.lg-sub{font-size:13.5px;color:var(--mut);margin:10px 0 6px;font-weight:600}
+.lg-form label{display:block;margin:18px 0 8px;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
+.lg-form input,.lg-form select{box-sizing:border-box;width:100%;height:50px;border-radius:999px;padding:0 20px;font-family:inherit;font-size:14.5px;font-weight:600;
+  background:var(--paper-w);border:1.5px solid var(--pline);color:var(--ink-d);color-scheme:light;transition:.25s var(--ease)}
+.lg-form select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%236B7A99' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 6l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 18px center}
+.lg-form input::placeholder{color:#9AA6C0;font-weight:600}
+.lg-form input:focus,.lg-form select:focus{outline:none;background:#fff;border-color:var(--blue);box-shadow:0 0 0 4px rgba(47,107,255,.14)}
+.lg-roles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.lg-role{height:46px;border-radius:999px;background:var(--paper-w);border:1.5px solid var(--pline);color:var(--ink2);
+  font-size:13px;font-weight:800;cursor:pointer;transition:.3s var(--spring);font-family:inherit}
+.lg-role:hover{transform:translateY(-2px);border-color:#C9D3E8}
+.lg-role.active{background:var(--ink-d);color:#fff;border-color:var(--ink-d);box-shadow:0 12px 26px -12px rgba(6,17,46,.7)}
+.lg-submit{position:relative;overflow:hidden;width:100%;height:54px;margin-top:26px;border:0;border-radius:999px;font-family:inherit;
+  background:var(--cyan);color:var(--ink-d);font-size:15px;font-weight:800;cursor:pointer;
+  box-shadow:0 14px 34px -12px rgba(91,214,255,.9);transition:transform .2s var(--spring),box-shadow .25s}
+.lg-submit:hover{transform:translateY(-2px);box-shadow:0 18px 40px -12px rgba(91,214,255,1)}
+.lg-submit:active{transform:scale(.97)}
+.lg-submit:disabled{opacity:.5;pointer-events:none}
+.lg-error{display:none;margin-top:14px;padding:12px 16px;border-radius:18px;background:#FFECEA;color:#C2362A;font-size:13px;font-weight:700}
+.lg-branch{display:none}
+@media(max-width:760px){.lg-wrap{grid-template-columns:1fr;max-width:460px}.lg-side{display:none}.lg-form{padding:34px 26px 30px}}
 </style>
-<link rel="stylesheet" href="/static/css/ui.css?v=pro1">
 </head>
-<body>
-<div class="wrap">
-  <div class="side">
-    <div class="mark"><i class="ti ti-droplet"></i></div>
-    <h2>CarWash Cloud</h2>
+<body class="lg-page">
+<div class="lg-wrap">
+  <div class="lg-side">
+    <div class="lg-brand"><div class="lg-logo"><i class="ti ti-droplet-filled"></i></div>CarWash</div>
+    <h2>Cloud<br>для вашей<br>мойки</h2>
     <p>Касса, машины, зарплаты и отчёты по всем филиалам — в одном месте, в реальном времени.</p>
-    <div class="foot">5 филиалов · онлайн</div>
+    <div class="lg-chips"><span class="lg-chip"><i class="live"></i>Система на связи</span><span class="lg-chip">5 филиалов</span></div>
   </div>
 
-  <div class="card">
-    <div class="brand-row"><span class="dot"></span><span>Система на связи</span></div>
+  <div class="lg-form">
     <h1>Вход</h1>
-    <div class="sub">Общий пароль компании + ваше имя и должность</div>
+    <div class="lg-sub">Общий пароль компании + ваше имя и должность</div>
 
     <label>Пароль</label>
     <input type="password" id="password" placeholder="Общий пароль">
@@ -121,19 +75,19 @@ input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
     <input type="text" id="name" placeholder="Например, Иван">
 
     <label>Должность</label>
-    <div class="roles">
-      <button type="button" class="role-btn" data-role="мойщик">Мойщик</button>
-      <button type="button" class="role-btn" data-role="админ">Админ</button>
-      <button type="button" class="role-btn" data-role="владелец">Владелец</button>
+    <div class="lg-roles">
+      <button type="button" class="lg-role role-btn" data-role="мойщик">Мойщик</button>
+      <button type="button" class="lg-role role-btn" data-role="админ">Админ</button>
+      <button type="button" class="lg-role role-btn" data-role="владелец">Владелец</button>
     </div>
 
-    <div class="branch-field" id="branchField">
+    <div class="lg-branch" id="branchField">
       <label>Филиал</label>
       <select id="branch"><option value="">Загрузка…</option></select>
     </div>
 
-    <button class="btn-submit" id="submitBtn">Войти</button>
-    <div class="error" id="err"></div>
+    <button class="lg-submit" id="submitBtn">Войти</button>
+    <div class="lg-error" id="err"></div>
   </div>
 </div>
 

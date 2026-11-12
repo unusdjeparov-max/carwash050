@@ -564,5 +564,7 @@ backend (`bot.py`, `server.py`, `handlers/*`, `webapp/*`) компилирует
 Этапы:
 1. ✅ Фундамент + Дашборд сайта (dashboard.html по концепту, на живых данных)
 2. ✅ Сайт: Машины (канбан «В работе / Оплачено»), Касса, Запись (сетка боксов)
-3. ⏳ Сайт: workers, clients, loyalty, finance, reports, history, branches, settings, login, public-booking
-4. ⏳ Mini App (index.html): tabbar с blob, hero со спарклайном, bottom-sheet «Новая машина»
+3. ✅ Сайт: login и public-booking переписаны в Cloud; workers, clients, loyalty, finance, reports, history, branches, settings окрашены общей темой `theme-cloud.css` (разметка не переписывалась)
+4. 🔶 Mini App (index.html): подключён `css/theme-cloud-app.css` (токены, шрифты, плавающий tabbar с кнопкой «+», hero со спарклайном, карточки, кнопки, шторки; светлая тема отключена). Не сделано: bottom-sheet «Новая машина» (экран добавления остался полноэкранным, только перекрашен)
+
+Исправлено: в `theme-cloud.css` был дублированный `format('woff2')` — шрифты не грузились; версия кэша `?v=cloud2`.

@@ -857,6 +857,7 @@ textarea{resize:none;min-height:72px}
 }
 </style>
 <link rel="stylesheet" href="/static/css/ui.css?v=pro1">
+<link rel="stylesheet" href="/static/css/theme-cloud-app.css?v=cloud2">
 </head>
 <body class="v2-page">
 <div id="splash"><div class="sp-logo"><svg viewBox="0 0 104 104"><defs><linearGradient id="spg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a7bff"/><stop offset="1" stop-color="#0c2a9a"/></linearGradient></defs><rect x="8" y="8" width="88" height="88" rx="26" fill="url(#spg)"/><rect x="8.5" y="8.5" width="87" height="87" rx="25.5" fill="none" stroke="rgba(255,255,255,.35)"/><path d="M52 22c10 15 20 26 20 38a20 20 0 0 1-40 0c0-12 10-23 20-38z" fill="#fff"/><path d="M42 62a10 10 0 0 0 8 9" stroke="#6fdcff" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><div class="sp-name">CARWASH CLOUD</div><div class="sp-ring"></div></div>
@@ -873,6 +874,7 @@ textarea{resize:none;min-height:72px}
 <div class="tabbar">
   <div class="tab active" id="tab-home" data-tab="home"><i class="ti ti-home"></i>Главная</div>
   <div class="tab" id="tab-cash" data-tab="cash"><i class="ti ti-cash"></i>Касса</div>
+  <div class="tab-fab" id="tab-fab" onclick="switchTab('add')" title="Новая машина"><i class="ti ti-plus"></i></div>
   <div class="tab" id="tab-cars" data-tab="all-cars"><i class="ti ti-car"></i>Машины</div>
   <div class="tab" id="tab-finance" data-tab="finance"><i class="ti ti-receipt"></i>Финансы</div>
   <div class="tab" id="tab-my-stats" data-tab="my-stats"><i class="ti ti-wallet"></i>Моя смена</div>
@@ -883,7 +885,7 @@ textarea{resize:none;min-height:72px}
 /* ─── INIT ──────────────────────────────────────────────────────────────── */
 const tg = window.Telegram.WebApp;
 tg.ready(); tg.expand(); try{ tg.disableVerticalSwipes(); }catch(e){}
-try{ tg.setHeaderColor("#07123A"); tg.setBackgroundColor("#07123A"); }catch(e){}
+try{ tg.setHeaderColor("#060D26"); tg.setBackgroundColor("#060D26"); }catch(e){}
 
 window.addEventListener("error", (e) => {
   const el = document.getElementById("view-home");
@@ -960,9 +962,9 @@ function buildWaveSvg(values, activeIdx, maxVal, lineColor){
     :"").join("");
   const gradId=`g${Math.random().toString(36).slice(2,6)}`;
   return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
-    <defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${lineColor}" stop-opacity="0.2"/><stop offset="100%" stop-color="${lineColor}" stop-opacity="0"/></linearGradient></defs>
+    <defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${lineColor}" stop-opacity="0.38"/><stop offset="100%" stop-color="${lineColor}" stop-opacity="0"/></linearGradient></defs>
     <path d="${areaD}" fill="url(#${gradId})"/>
-    <path d="${d}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+    <path d="${d}" fill="none" stroke="${lineColor}" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
     ${dots}
   </svg>`;
 }
@@ -972,8 +974,8 @@ function applyTheme(t){
   document.documentElement.setAttribute("data-theme",t);
   try{ localStorage.setItem("cf_theme",t); }catch(e){}
   try{
-    if(t==="light"){ tg.setHeaderColor("#07123A"); tg.setBackgroundColor("#07123A"); }
-    else{ tg.setHeaderColor("#07123A"); tg.setBackgroundColor("#07123A"); }
+    if(t==="light"){ tg.setHeaderColor("#060D26"); tg.setBackgroundColor("#060D26"); }
+    else{ tg.setHeaderColor("#060D26"); tg.setBackgroundColor("#060D26"); }
   }catch(e){}
 }
 function currentTheme(){ return document.documentElement.getAttribute("data-theme")||(tg.colorScheme==="light"?"light":"dark"); }
@@ -1070,7 +1072,7 @@ async function ensureMe(){
   // именно этого филиала (по умолчанию — минимум прав, а не максимум).
   const isPrivileged = !!ME.is_owner || !!ME.is_branch_admin;
   document.getElementById("tab-my-stats")?.classList.toggle("hidden", !ME.is_employee);
-  ["tab-home","tab-cash","tab-cars","tab-finance","tab-more"].forEach(id=>{
+  ["tab-home","tab-cash","tab-cars","tab-finance","tab-more","tab-fab"].forEach(id=>{
     document.getElementById(id)?.classList.toggle("hidden", !isPrivileged);
   });
   if(!isPrivileged && document.querySelector(".tab.active")?.dataset.tab!=="my-stats"){
