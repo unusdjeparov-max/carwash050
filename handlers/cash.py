@@ -356,6 +356,8 @@ async def show_summary(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if s.get("income_beznal"): inc_detail_parts.append(f"безнал +{s['income_beznal']}₽")
         inc_detail = " | ".join(inc_detail_parts)
         text += f"\n💰 Доходы: {s['total_incomes']}₽ ({inc_detail})\n   {s['incomes_str']}"
+    from cash_balance import apply_cash_balance
+    apply_cash_balance(s, branch, session.get("date"))
     text += f"\n🏦 Остаток: *{s['remainder']}₽*"
     keyboard = [[
         InlineKeyboardButton("📄 PDF", callback_data="cmd_pdf"),
