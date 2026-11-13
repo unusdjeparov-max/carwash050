@@ -42,6 +42,7 @@ from sessions import (
     set_booking_status, delete_booking, find_conflicting_booking,
 )
 from calculator import calculate_summary
+from cash_balance import get_cash_balance, set_cash_balance, clear_cash_balance
 from pdf_generator import generate_pdf
 from xlsx_generator import generate_xlsx
 from history_log import log_action, get_history
@@ -1209,6 +1210,37 @@ def api_delete_loyalty(branch: str, idx: int, x_init_data: str = Header(default=
     log_action(branch, "loyalty_delete", current_user_id(x_init_data), current_user_name(x_init_data),
                f"машина №{removed.get('car_num')} · -{removed.get('discount',0)}₽")
     return {"ok": True, "summary": calculate_summary(session)}
+
+
+
+# ── ОБЩИЙ ОСТАТОК НАЛИЧНЫХ В КАССЕ (задаётся вручную, дальше пересчитывается) ──
+class CashBalanceIn(BaseModel):
+    branch: str
+    amount: int
+
+
+@app.get("/api/cash-balance")
+def api_get_cash_balance(branch: str, x_init_data: str = Header(default=""), x_site_token: str = Header(default="")):
+    require_access(x_init_data, x_site_token)
+    return get_cash_balance(branch)
+
+
+@app.post("/api/cash-balance")
+def api_set_cash_balance(body: CashBalanceIn, x_init_data: str = Header(default=""), x_site_token: str = Header(default="")):
+    require_branch_admin(body.branch, x_init_data, x_site_token)
+    if body.amount < 0:
+        raise HTTPException(400, "Остаток не может быть отрицательным")
+    res = set_cash_balance(body.branch, body.amount)
+    log_action(body.branch, "cash_balance", current_user_id(x_init_data), current_user_name(x_init_data),
+               f"Остаток наличных в кассе установлен: {body.amount}₽")
+    return res
+
+
+@app.delete("/api/cash-balance")
+def api_clear_cash_balance(branch: str, x_init_data: str = Header(default=""), x_site_token: str = Header(default="")):
+    require_branch_admin(branch, x_init_data, x_site_token)
+    clear_cash_balance(branch)
+    return {"set": False}
 
 
 @app.post("/api/expense")
