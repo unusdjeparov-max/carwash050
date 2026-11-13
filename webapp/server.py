@@ -42,7 +42,7 @@ from sessions import (
     set_booking_status, delete_booking, find_conflicting_booking,
 )
 from calculator import calculate_summary
-from cash_balance import get_cash_balance, set_cash_balance, clear_cash_balance
+from cash_balance import get_cash_balance, set_cash_balance, clear_cash_balance, apply_cash_balance
 from pdf_generator import generate_pdf
 from xlsx_generator import generate_xlsx
 from history_log import log_action, get_history
@@ -601,7 +601,7 @@ def api_remove_user(user_id: int, x_init_data: str = Header(default=""), x_site_
 def api_session(branch: str, x_init_data: str = Header(default=""), x_site_token: str = Header(default="")):
     require_access(x_init_data, x_site_token)
     session = get_session(branch)
-    summary = calculate_summary(session)
+    summary = apply_cash_balance(calculate_summary(session), branch, session.get("date"))
     return {"session": session, "summary": summary}
 
 
@@ -1550,7 +1550,7 @@ def api_day_summary(branch: str, date: str, x_init_data: str = Header(default=""
 def api_report_today(branch: str, x_init_data: str = Header(default=""), x_site_token: str = Header(default="")):
     require_access(x_init_data, x_site_token)
     session = get_session(branch)
-    summary = calculate_summary(session)
+    summary = apply_cash_balance(calculate_summary(session), branch, session.get("date"))
     svc_count = {}
     for c in session["cars"]:
         svc_count[c.get("service", "—")] = svc_count.get(c.get("service", "—"), 0) + 1
@@ -1989,7 +1989,7 @@ def api_report_pdf(branch: str, date: str = "", x_init_data: str = Header(defaul
         if not day_data.get("cars"):
             raise HTTPException(404, "Нет данных за сегодня")
 
-    summary = calculate_summary(day_data)
+    summary = apply_cash_balance(calculate_summary(day_data), branch, date)
     safe_branch = branch.replace(" ", "_")
     pdf_path = os.path.join(tempfile.gettempdir(), f"report_{safe_branch}_{date.replace('.', '')}.pdf")
     generate_pdf(day_data, summary, pdf_path)
@@ -2011,7 +2011,7 @@ def api_report_xlsx(branch: str, date: str = "", x_init_data: str = Header(defau
         if not day_data.get("cars"):
             raise HTTPException(404, "Нет данных за сегодня")
 
-    summary = calculate_summary(day_data)
+    summary = apply_cash_balance(calculate_summary(day_data), branch, date)
     safe_branch = branch.replace(" ", "_")
     xlsx_path = os.path.join(tempfile.gettempdir(), f"report_{safe_branch}_{date.replace('.', '')}.xlsx")
     generate_xlsx(day_data, summary, xlsx_path)
