@@ -54,6 +54,8 @@
           <div style="margin-top:22px" class="inner">
             <div style="display:flex;justify-content:space-between;padding:16px 18px;font-size:13px;font-weight:700;color:var(--t2)"><span>Зарплаты к выплате</span><b style="color:#fff" id="kSalaries">—</b></div>
             <div style="height:1px;background:var(--line)"></div>
+            <div style="display:flex;justify-content:space-between;padding:16px 18px;font-size:13px;font-weight:700;color:var(--t2)"><span>Наличных в кассе (общий остаток)</span><b style="color:#fff" id="kCashBal">—</b></div>
+            <div style="height:1px;background:var(--line)"></div>
             <div style="display:flex;justify-content:space-between;padding:16px 18px;font-size:13px;font-weight:700;color:var(--t2)"><span>Расходы за смену</span><b style="color:#fff" id="kExpenses">—</b></div>
           </div>
           <div class="pays" id="pays">
@@ -64,6 +66,15 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- зарплаты сотрудников, работающих сегодня -->
+    <div class="card" id="salCard" style="margin-top:16px;padding:22px 24px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap">
+        <div><div class="eyebrow">Зарплаты сегодня</div><div style="font-size:12px;color:var(--t3);font-weight:600;margin-top:4px">Сотрудники, которые работают в этот день · обновляется по мере добавления машин</div></div>
+        <div style="font-size:22px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums" id="salTotal">—</div>
+      </div>
+      <div id="salList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:16px"></div>
     </div>
 
     <div class="filters">
@@ -135,6 +146,27 @@ if (CW.requireAuth()) {
     $("#stk2").innerHTML = who("безнал").map(n => avatar(n)).join("");
     $("#stk3").innerHTML = who("visa").map(n => avatar(n)).join("");
     $("#payCash").textContent = money(summary.cash); $("#payBez").textContent = money(summary.beznal); $("#payVisa").textContent = money(summary.visa);
+  }
+
+  /* ---------- зарплаты сотрудников, работающих сегодня ---------- */
+  function renderSalaries(workersData) {
+    const sched = (workersData && workersData.schedule) || {};
+    const ws = summary.washer_salaries || {};
+    const roles = summary.role_earnings || {};
+    const carCnt = {}; cars.forEach(c => { if (c.employee) carCnt[c.employee] = (carCnt[c.employee] || 0) + 1; });
+    const adminName = session.admin_name || "";
+    const rows = [];
+    const seen = new Set();
+    // мойщики: по графику «работает сегодня» + все, у кого уже есть машины/ставка в смене
+    Object.keys(sched).forEach(n => { if (sched[n].working || ws[n] || carCnt[n]) { seen.add(n); rows.push({ name: n, role: "Мойщик", sum: ws[n] || 0, cars: carCnt[n] || 0 }); } });
+    Object.keys(ws).forEach(n => { if (!seen.has(n)) { seen.add(n); rows.push({ name: n, role: "Мойщик", sum: ws[n] || 0, cars: carCnt[n] || 0 }); } });
+    // администратор смены
+    if (adminName || summary.admin_salary) {
+      rows.unshift({ name: adminName || "Администратор", role: "Администратор", sum: summary.admin_salary || 0, cars: null });
+    }
+    const total = rows.reduce((a, r) => a + r.sum, 0);
+    $("#salTotal").textContent = money(total);
+    $("#salList").innerHTML = rows.map(r => `<div class="inner" style="display:flex;align-items:center;gap:12px;padding:14px 16px">${avatar(r.name, 38)}<div style="flex:1;min-width:0"><b style="font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.name)}</b><small style="font-size:12px;color:var(--t3);font-weight:600">${r.role}${r.cars == null ? "" : " · " + r.cars + " маш."}</small></div><b style="font-size:16px;font-variant-numeric:tabular-nums">${money(r.sum)}</b></div>`).join("") || '<div class="sh-empty" style="grid-column:1/-1">Сегодня никто не отмечен как работающий</div>';
   }
 
   /* ---------- вкладки / список / детали ---------- */
@@ -211,6 +243,9 @@ if (CW.requireAuth()) {
       CW.runCounts();
       [...new Set(cars.map(c => c.employee).filter(Boolean))].forEach(n => $("#empSel").insertAdjacentHTML("beforeend", `<option value="${esc(n)}">${esc(n)}</option>`));
       renderChart(); renderSplit(); renderTabs(); renderList();
+      let wd = {}; try { wd = await CW.authFetch(`/api/workers?branch=${encodeURIComponent(branch)}`); } catch (_) {}
+      renderSalaries(wd);
+      try { const cb = await CW.authFetch(`/api/cash-balance?branch=${encodeURIComponent(branch)}`); $("#kCashBal").textContent = cb.set ? money(cb.balance) : "не задан"; } catch (_) {}
     } catch (e) {
       errEl.textContent = e.message || "Не удалось загрузить данные"; errEl.style.display = "block";
       renderTabs(); renderList();

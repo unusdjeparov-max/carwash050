@@ -598,12 +598,14 @@ if (CW.requireAuth()) {
       const esc = t => String(t == null ? "" : t).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
       empty.style.display = cars.length ? "none" : "block";
       const cols = [["in_progress", "В работе", "var(--cyan)"], ["done", "Оплачено", "var(--green)"]];
+      // Порядковый номер по списку добавления (1 = первая машина смены), не зависит от колонки/статуса
+      cars.forEach((c, i) => { c._pos = i + 1; });
       const rev = cars.slice().reverse();
       kan.innerHTML = cols.map(([k, name, color]) => {
         const arr = rev.filter(c => (c.status === "done") === (k === "done"));
         return `<div class="card col"><h4><span style="display:flex;align-items:center;gap:10px;color:#fff"><i style="width:10px;height:10px;border-radius:50%;background:${color}"></i>${name}</span><span>${arr.length}</span></h4>
           ${arr.map((c, i) => `<div class="kc" style="--k:${Math.min(i, 10)}">
-            <div style="display:flex;justify-content:space-between;gap:10px"><div style="min-width:0"><b>${esc(c.client_name || c.car || "—")}</b><small>№${c.num} · ${esc(c.time || "")} · ${esc(c.service || "—")}</small></div>
+            <div style="display:flex;justify-content:space-between;gap:10px"><div style="display:flex;gap:10px;min-width:0"><span title="Порядковый номер машины за смену" style="flex:none;min-width:30px;height:30px;padding:0 8px;border-radius:15px;display:grid;place-items:center;background:var(--cyan);color:var(--ink-d);font-weight:800;font-size:13px;font-variant-numeric:tabular-nums">${c._pos}</span><div style="min-width:0"><b>${esc(c.client_name || c.car || "—")}</b><small>${esc(c.time || "")} · ${esc(c.service || "—")}</small></div></div>
               <div class="row-actions" style="flex:none"><div class="icon-btn" title="Редактировать" onclick="CW_editCar(${c.num})"><i class="ti ti-pencil"></i></div><div class="icon-btn danger" title="Удалить" onclick="CW_deleteCar(${c.num})"><i class="ti ti-trash"></i></div></div></div>
             <div class="r"><div style="display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px"><span class="av" style="background:${empColor(c.employee || "")};width:30px;height:30px;font-size:10.5px">${esc(CW.initials(c.employee || "—"))}</span>${CW.money(c.price)} ${payTag(c.payment_split ? Object.keys(c.payment_split)[0] : c.payment)}</div>
               <button class="go" title="${k === "done" ? "Вернуть в работу" : "Отметить оплаченной"}" onclick="CW_toggleStatus(${c.num}, '${c.status}')"><i class="ti ${k === "done" ? "ti-arrow-back-up" : "ti-arrow-up-right"}"></i></button></div></div>`).join("") || '<small style="color:var(--t3);font-weight:600">Пусто</small>'}</div>`;
