@@ -35,6 +35,11 @@ from pydantic import BaseModel
 from sessions import _read_json_locked, _write_json_locked, DATA_DIR  # переиспользуем ту же файловую блокировку
 
 SITE_PASSWORD = os.getenv("SITE_PASSWORD", "changeme")
+# Отдельный пароль для ролей «админ» и «владелец». Если переменная не задана —
+# поведение прежнее: один общий пароль SITE_PASSWORD для всех ролей.
+# Если задана: SITE_PASSWORD подходит только для «мойщик», а
+# SITE_ADMIN_PASSWORD — только для «админ» и «владелец».
+SITE_ADMIN_PASSWORD = os.getenv("SITE_ADMIN_PASSWORD", "").strip()
 TOKEN_TTL = int(os.getenv("SITE_TOKEN_TTL", str(60 * 60 * 24 * 14)))  # 14 дней по умолчанию
 
 SESSIONS_FILE = os.path.join(DATA_DIR, "site_web_sessions.json")
@@ -63,10 +68,11 @@ def _cleanup(data: dict) -> dict:
 
 
 def login(body: LoginIn) -> dict:
-    if not secrets.compare_digest(body.password.strip(), SITE_PASSWORD):
-        raise HTTPException(401, "Неверный пароль")
     name = body.name.strip()
     role = body.role.strip().lower()
+    expected = SITE_ADMIN_PASSWORD if (SITE_ADMIN_PASSWORD and role in ("админ", "владелец")) else SITE_PASSWORD
+    if not secrets.compare_digest(body.password.strip().encode("utf-8"), expected.encode("utf-8")):
+        raise HTTPException(401, "Неверный пароль")
     if not name:
         raise HTTPException(400, "Укажите имя")
     if role not in VALID_ROLES:
