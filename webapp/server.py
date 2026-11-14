@@ -1654,8 +1654,15 @@ def api_my_employee_stats(branch: str, period: str = "today",
     которая видит только заработок мойщика. Доступ только к своим данным:
     имя берётся из привязки Telegram-аккаунта (load_users), не из параметров."""
     from employee_stats import get_branch_employee_roles, employee_period_stats, week_range, month_range
-    name = _employee_name_from_init(x_init_data)
     roles = get_branch_employee_roles(branch)
+    site = get_site_session(x_site_token)
+    if site:
+        # Вход в приложение /app по паролю: имя берём из сессии входа и
+        # сверяем (без учёта регистра) со списком сотрудников филиала.
+        want = (site.get("name") or "").strip().lower()
+        name = next((n for n in roles if n.strip().lower() == want), "")
+    else:
+        name = _employee_name_from_init(x_init_data)
     if not name or name not in roles:
         raise HTTPException(403, "Вы не привязаны как сотрудник этого филиала")
 
