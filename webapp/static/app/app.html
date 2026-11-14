@@ -222,6 +222,11 @@ html,body{min-height:var(--vh,100dvh)}
 html,body,#app{background-color:#060D26!important}
 #app::after{content:"";position:absolute;left:0;right:0;bottom:0;height:calc(112px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,rgba(6,13,38,0),#060D26 62%,#060D26);pointer-events:none;z-index:15}
 .tabbar{z-index:20}
+
+/* ===== v15: меню прижато к низу видимого окна ===== */
+.tabbar{bottom:calc(10px + var(--sab,env(safe-area-inset-bottom,0px)))!important}
+#view{padding-bottom:calc(120px + var(--sab,env(safe-area-inset-bottom,0px)))!important}
+#app::after{height:calc(104px + var(--sab,env(safe-area-inset-bottom,0px)))!important}
 </style></head>
 <body><div id="app"></div>
 <script>
@@ -532,10 +537,12 @@ async function brSwitch(i){const b=(S.bsum||[])[+i];if(!b||b.branch==S.br)return
 async function brAdmin(i){const b=(S.bsum||[])[+i],sl=$('#bsel'+i),uid=sl?parseInt(sl.value,10):0;if(!b)return;if(!uid){toast('Выберите пользователя из белого списка');return}try{await api('/api/branch-admin',{method:'POST',body:JSON.stringify({branch:b.branch,user_id:uid})});toast('Администратор назначен');loadBr()}catch(e){if(e.message!='auth')toast(e.message||'Не удалось назначить')}}
 
 /* ===== v8: высота экрана без прыжков ===== */
-const vhSet=()=>{ // v14: высота = реально видимая область (раньше брали screen.height — iOS отрезал низ, меню обрезалось по полоске)
+const vhSet=()=>{ // v15: высота = реально видимая область; если окно урезано (снизу системная полоса) — нижний safe-area не нужен
  const vv=window.visualViewport;let h=Math.round(Math.min(...[innerHeight,vv&&vv.height].filter(Boolean)));
  if(!h||h<200)h=Math.max(innerHeight,document.documentElement.clientHeight||0);
- document.documentElement.style.setProperty('--vh',h+'px')};
+ const st=navigator.standalone||(matchMedia&&matchMedia('(display-mode: standalone)').matches);
+ const cut=st&&matchMedia('(orientation: portrait)').matches&&(Math.max(screen.height,screen.width)-h>20);
+ const r=document.documentElement.style;r.setProperty('--vh',h+'px');r.setProperty('--sab',cut?'0px':'env(safe-area-inset-bottom,0px)')};
 const typing=()=>{const e=document.activeElement;return !!e&&/^(INPUT|SELECT|TEXTAREA)$/.test(e.tagName)};
 vhSet();
 addEventListener('resize',()=>{if(!typing()){vhSet();scrollTo(0,0)}moveBlob()});
