@@ -200,6 +200,14 @@ html,body{min-height:var(--vh,100dvh)}
 .tabbar.w{left:50%;right:auto;width:min(300px,calc(100% - 28px));transform:translateX(-50%);grid-template-columns:1fr 1fr}
 .wm .bpill{pointer-events:none}.wm .bpill svg:last-child{display:none}.wm .bpill{padding-right:14px}
 .seg{margin:2px 0 4px}
+
+/* ===== v11: чистое «облачко» без полоски ===== */
+/* карточки внутри прокрутки без backdrop-filter — на iOS они рисуются прямоугольником поверх меню */
+.item,.card,.grp,.bcard,.lg-card{-webkit-backdrop-filter:none;backdrop-filter:none}
+/* контент плавно исчезает до меню — под «облачком» ничего не торчит */
+#view{--sb:env(safe-area-inset-bottom,0px);-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 156px - var(--sb)),transparent calc(100% - 104px - var(--sb)));mask-image:linear-gradient(to bottom,#000 calc(100% - 156px - var(--sb)),transparent calc(100% - 104px - var(--sb)))}
+/* спрятанный тост не должен выглядывать у верхнего края */
+.toast{opacity:0;transform:translate(-50%,-160px);transition:transform .4s var(--ease),opacity .25s}.toast.on{opacity:1;transform:translate(-50%,0)}
 </style></head>
 <body><div id="app"></div>
 <script>
