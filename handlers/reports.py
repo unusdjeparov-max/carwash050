@@ -138,8 +138,6 @@ async def report_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ Нет данных за {date_str} в «{branch}»."); return
     await update.message.reply_text(f"⏳ Генерирую PDF за {date_str}...")
     summary  = calculate_summary(day_data)
-    from cash_balance import apply_cash_balance
-    apply_cash_balance(summary, branch, date_str)
     import os
     from pdf_generator import generate_pdf
     safe_branch = branch.replace(" ", "_")
