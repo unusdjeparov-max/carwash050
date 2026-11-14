@@ -53,10 +53,10 @@
       </div>
       <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
         <div style="font-size:34px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums" id="cbValue">—</div>
-        <div style="font-size:13px;color:var(--t3);font-weight:600" id="cbHint">Остаток не задан — укажите, сколько наличных в кассе было до сегодняшней выручки</div>
+        <div style="font-size:13px;color:var(--t3);font-weight:600" id="cbHint">Остаток не задан — укажите, сколько сейчас наличных в кассе</div>
       </div>
       <div class="add-row" id="cbForm" style="display:none;margin-top:14px">
-        <input class="f-amount" id="cbInput" type="number" min="0" placeholder="Остаток на начало дня, ₽ (без сегодняшней налички)" style="flex:1">
+        <input class="f-amount" id="cbInput" type="number" min="0" placeholder="Актуальный остаток, ₽" style="flex:1">
         <button id="cbSetBtn" title="Установить остаток"><i class="ti ti-check"></i></button>
       </div>
     </div>
@@ -232,7 +232,7 @@ if (CW.requireAuth()) {
         m.textContent = "пересчитывается автоматически";
       } else {
         v.textContent = "—"; m.textContent = "";
-        h.textContent = "Остаток не задан — укажите, сколько наличных в кассе было до сегодняшней выручки";
+        h.textContent = "Остаток не задан — укажите, сколько сейчас наличных в кассе";
       }
     } catch (e) { /* не блокируем страницу */ }
   }
