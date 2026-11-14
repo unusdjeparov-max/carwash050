@@ -217,6 +217,11 @@ html,body{min-height:var(--vh,100dvh)}
 .fab:after{display:none}
 .tb.on,.blob{box-shadow:none!important}
 .sheet-backdrop,.shade{-webkit-backdrop-filter:none!important}
+
+/* ===== v13: без полоски под «облачком» — контент плавно растворяется в цвет фона, нижняя зона одного цвета ===== */
+html,body,#app{background-color:#060D26!important}
+#app::after{content:"";position:absolute;left:0;right:0;bottom:0;height:calc(112px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,rgba(6,13,38,0),#060D26 62%,#060D26);pointer-events:none;z-index:15}
+.tabbar{z-index:20}
 </style></head>
 <body><div id="app"></div>
 <script>
