@@ -60,7 +60,6 @@ def generate_xlsx(day_data: dict, summary: dict, output_path: str) -> None:
         ("Наличные, ₽", summary.get("cash", 0)),
         ("Безнал, ₽", summary.get("beznal", 0)),
         ("Карта, ₽", summary.get("visa", 0)),
-        ("Остаток в кассе, ₽", summary.get("remainder", 0)),
     ]
     for r in rows:
         ws2.append(list(r))

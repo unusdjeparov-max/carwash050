@@ -443,9 +443,6 @@ def draw_empty_row(c, y_top, num):
 def generate_pdf(session: dict, summary: dict, output_path: str):
     c = pdfcanvas.Canvas(output_path, pagesize=A4)
     c.setTitle(f"Касса автомойки {session['date']}")
-    if not summary.get("remainder_is_cash_balance"):
-        from cash_balance import apply_cash_balance
-        apply_cash_balance(summary, session.get("branch", ""), session.get("date"))
     admin_name = get_branch_admin_name(session.get("branch", ""))
 
     y = PAGE_H - MT

@@ -78,8 +78,6 @@ async def pdf_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     from pdf_generator import generate_pdf
     from datetime import datetime
     summary = calculate_summary(session)
-    from cash_balance import apply_cash_balance
-    apply_cash_balance(summary, branch, session.get("date"))
     safe_branch = branch.replace(" ", "_")
     pdf_path = os.path.expanduser(f"~/kassa_{safe_branch}_{datetime.now().strftime('%d%m%Y_%H%M')}.pdf")
     try:
