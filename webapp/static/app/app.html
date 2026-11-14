@@ -532,10 +532,9 @@ async function brSwitch(i){const b=(S.bsum||[])[+i];if(!b||b.branch==S.br)return
 async function brAdmin(i){const b=(S.bsum||[])[+i],sl=$('#bsel'+i),uid=sl?parseInt(sl.value,10):0;if(!b)return;if(!uid){toast('Выберите пользователя из белого списка');return}try{await api('/api/branch-admin',{method:'POST',body:JSON.stringify({branch:b.branch,user_id:uid})});toast('Администратор назначен');loadBr()}catch(e){if(e.message!='auth')toast(e.message||'Не удалось назначить')}}
 
 /* ===== v8: высота экрана без прыжков ===== */
-const vhSet=()=>{let h=Math.max(innerHeight,document.documentElement.clientHeight||0);
- // в установленном приложении iOS innerHeight бывает меньше экрана (снизу остаётся пустая полоса) — берём реальную высоту экрана
- const st=navigator.standalone||(matchMedia&&matchMedia('(display-mode: standalone)').matches);
- if(st&&matchMedia('(orientation: portrait)').matches)h=Math.max(h,Math.max(screen.height,screen.width));
+const vhSet=()=>{ // v14: высота = реально видимая область (раньше брали screen.height — iOS отрезал низ, меню обрезалось по полоске)
+ const vv=window.visualViewport;let h=Math.round(Math.min(...[innerHeight,vv&&vv.height].filter(Boolean)));
+ if(!h||h<200)h=Math.max(innerHeight,document.documentElement.clientHeight||0);
  document.documentElement.style.setProperty('--vh',h+'px')};
 const typing=()=>{const e=document.activeElement;return !!e&&/^(INPUT|SELECT|TEXTAREA)$/.test(e.tagName)};
 vhSet();
