@@ -4,8 +4,12 @@
 <title>Carwash</title>
 <meta name="theme-color" content="#060D26"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Carwash">
 <link rel="manifest" href="/app/manifest.webmanifest"><link rel="apple-touch-icon" href="/app/apple-touch-icon.png">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Unbounded:wght@500;600&display=swap">
+<link rel="preload" href="/static/fonts/Manrope-0.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/static/fonts/Manrope-1.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/static/fonts/Unbounded-2.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/static/fonts/Unbounded-3.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+@font-face{font-family:'Manrope';font-style:normal;font-weight:200 800;font-display:block;src:url(/static/fonts/Manrope-0.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116,U+20BD}
+@font-face{font-family:'Manrope';font-style:normal;font-weight:200 800;font-display:block;src:url(/static/fonts/Manrope-1.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Unbounded';font-style:normal;font-weight:200 900;font-display:block;src:url(/static/fonts/Unbounded-2.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116,U+20BD}
+@font-face{font-family:'Unbounded';font-style:normal;font-weight:200 900;font-display:block;src:url(/static/fonts/Unbounded-3.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 :root{--page:#060D26;--t2:rgba(255,255,255,.7);--t3:rgba(255,255,255,.46);--blue:#2F6BFF;--cyan:#5BD6FF;--green:#4ADE9C;--red:#FF8F85;--amber:#FFC46B;--violet:#A99CFF;--line:rgba(255,255,255,.08);--glass:rgba(255,255,255,.055);--ease:cubic-bezier(.2,.8,.2,1);--body:'Manrope',system-ui,-apple-system,sans-serif;--brand:'Unbounded','Manrope',sans-serif}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
@@ -165,13 +169,26 @@ html,body{height:100%;background:#060D26}body{display:block;overflow:hidden}
 .crew div{flex:none;display:grid;justify-items:center;gap:7px;width:62px;font-size:11.5px;color:var(--t2);text-align:center}
 .crew .ava{width:50px;height:50px;font-size:14px;position:relative}.crew .ava:after{content:"";position:absolute;right:0;bottom:1px;width:12px;height:12px;border-radius:50%;background:var(--green);border:2px solid #0a1433}
 .crew span{max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.shiftc .m b{white-space:nowrap}.shiftc{margin-top:12px;display:flex;gap:12px;align-items:center;padding:13px 15px;border-radius:24px}
+.shiftc .m b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.shiftc{margin-top:12px;display:flex;gap:12px;align-items:center;padding:13px 15px;border-radius:24px}
 .tabbar{height:70px}
 .item,.card,.grp,.bcard{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .btn.g2{background:var(--glass);border:1px solid var(--line)}
 .paycard{padding:6px 16px 4px;border-radius:26px}
 .pay-h{display:flex;justify-content:space-between;align-items:center;padding:12px 0 14px;border-bottom:1px solid var(--line)}.pay-h small{display:block;color:var(--t3);font-size:12px}.pay-h b{display:block;font:600 24px var(--brand);letter-spacing:-.03em;margin-top:6px;color:var(--green)}
 .pay-r{display:flex;align-items:center;gap:13px;padding:13px 0}.pay-r+.pay-r{border-top:1px solid var(--line)}.pay-r .ava{width:42px;height:42px;font-size:13px}.pay-r .m b{font-size:15px}.pay-r .m span{display:block;margin-top:2px;text-transform:capitalize}.pay-r .prog{height:5px;margin-top:8px}.pay-r .price{font-size:15.5px;white-space:nowrap}
+
+/* ===== v8: устойчивая вёрстка под любой экран ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{position:fixed;inset:0;width:100%;overflow:hidden;overscroll-behavior:none;touch-action:manipulation}
+#app{top:0;bottom:auto;height:var(--vh,100dvh);width:100%;contain:layout paint}
+#view{overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable both-edges}
+.sheet{overscroll-behavior:contain;max-height:calc(var(--vh,100dvh)*.88)}
+#view *,.sheet *{min-width:0}.m{min-width:0}.m b,.m span{overflow-wrap:break-word}.shiftc .m span{white-space:nowrap}
+input,select,textarea{font-size:16px!important}
+.big{font-size:clamp(30px,9.6vw,38px)}.h1{font-size:clamp(23px,7vw,27px)}
+@media(max-width:359px){.shiftc{gap:8px;padding:12px}.shiftc .m b{font-size:14px;white-space:normal;line-height:1.2}.shiftc .btn{padding:10px 12px!important}.shiftc .ib{width:36px;height:36px}#view{padding-left:14px;padding-right:14px}.row,.kpi{gap:8px}.kpi .card{padding:11px}.kpi .n{font-size:15px}.card .n{font-size:16px}.tabbar{left:8px;right:8px;grid-template-columns:1fr 1fr 66px 1fr 1fr}.tb{font-size:9.5px}.hero{padding:18px}.bpill{max-width:150px}.lg-hero h1{font-size:26px}}
+@media(max-height:620px){.lg{justify-content:flex-start}.lg-hero h1{margin-top:16px}}
+@media(min-width:481px){#app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
 </style></head>
 <body><div id="app"></div>
 <script>
@@ -204,7 +221,7 @@ function loginView(){
   try{const r=await fetch(API+'/api/site/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p,name:n,role,branch:role=='владелец'?'':$('#b').value})});const d=await r.json();if(!r.ok)throw new Error(d.detail||'Неверные данные');
    L.cw_token=d.token;L.cw_name=d.name;L.cw_role=d.role;L.cw_branch=d.branch||'';S.br=L.cw_active_branch||d.branch||'';boot()}
   catch(e){const x=$('#e');if(x)x.textContent=e.message||'Не удалось войти'}const g=$('#go');if(g)g.disabled=false}};
-function shell(){
+function shell(){S._h='';S._lt='';
  const ic=p=>`<svg viewBox="0 0 24 24">${p}</svg>`;
  $('#app').innerHTML='<div class="glow"></div><div id="view"></div><nav class="tabbar"><span class="blob"></span><button class="tb" data-t="home">'+ic('<path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>')+'Главная</button><button class="tb" data-t="cars">'+ic('<path d="M5 16l1.5-5a2 2 0 0 1 1.9-1.4h7.2a2 2 0 0 1 1.9 1.4L19 16M4 16h16v3H4zM7 19v1M17 19v1"/>')+'Машины</button><button class="fab" data-t="add">'+ic('<path d="M12 5v14M5 12h14"/>')+'</button><button class="tb" data-t="cash">'+ic('<rect x="3" y="6" width="18" height="12" rx="3"/><circle cx="12" cy="12" r="2.5"/>')+'Касса</button><button class="tb" data-t="set">'+ic(GP)+'Настройки</button></nav><div class="shade" id="shade"></div><div class="sheet" id="sheet"></div><div class="toast" id="toast"></div>';
  $('#shade').onclick=closeSh;$('#sheet').onclick=sheetClick;
@@ -220,7 +237,7 @@ cash(){const sm=S.sess.summary,ss=S.sess.session,c=S.cash,li=(a,t)=>(a||[]).map(
  return hd('Касса')+`<div class="hero"><small>Остаток сейчас</small><div class="big">${c&&c.set?f(c.balance):'—'} <span>₽</span></div><span class="pill">${c&&c.set?'Задан: '+f(c.amount)+' ₽':'Остаток не задан на сайте'}</span></div><div class="row"><div class="card"><small>Нал</small><div class="n">${f(sm.cash)}</div></div><div class="card"><small>Visa</small><div class="n">${f(sm.visa)}</div></div><div class="card"><small>Безнал</small><div class="n">${f(sm.beznal)}</div></div></div><h2>Приходы</h2><div class="list">${li(ss.incomes,'Приход')||empty('Приходов нет')}</div><h2>Расходы</h2><div class="list">${li(ss.expenses,'Расход')||empty('Расходов нет')}</div>`},
 };
 function moveBlob(){const b=$('.tb.on'),k=$('.blob');if(!k)return;if(!b){k.style.opacity=0;return}k.style.opacity=1;k.style.width=b.offsetWidth+'px';k.style.transform='translateX('+b.offsetLeft+'px)'}
-function render(){const v=$('#view');if(!v||!S.sess)return;if(S.tab=='cl'&&document.activeElement&&document.activeElement.id=='clq')return;if(S.tab=='br'&&document.activeElement&&document.activeElement.tagName=='SELECT')return;const same=S._lt==S.tab,y=same?v.scrollTop:0;v.innerHTML=`<div class="${same?'':'in'}">`+V[S.tab]()+'</div>';S._lt=S.tab;if(S.tab=='cl')clFill();if(S.tab=='rep')rpEnsure();v.scrollTop=y;document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.dataset.t==(NAV[S.tab]||S.tab)));moveBlob()}
+function render(){const v=$('#view');if(!v||!S.sess)return;if(S.tab=='cl'&&document.activeElement&&document.activeElement.id=='clq')return;if(S.tab=='br'&&document.activeElement&&document.activeElement.tagName=='SELECT')return;const same=S._lt==S.tab,y=same?v.scrollTop:0;const html=V[S.tab]();if(same&&S._h===html)return;S._h=html;v.innerHTML=`<div class="${same?'':'in'}">`+html+'</div>';S._lt=S.tab;if(S.tab=='cl')clFill();if(S.tab=='rep')rpEnsure();v.scrollTop=y;document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.dataset.t==(NAV[S.tab]||S.tab)));moveBlob()}
 async function load(q){const v=$('#view');try{const[a,c,wk,bk,su]=await Promise.all([api('/api/session?branch='+encodeURIComponent(S.br)),api('/api/cash-balance?branch='+encodeURIComponent(S.br)).catch(()=>({set:false})),api('/api/workers?branch='+encodeURIComponent(S.br)).catch(()=>({workers:[]})),api('/api/bookings?branch='+encodeURIComponent(S.br)+'&date='+S.bd).catch(()=>({bookings:[],boxes:[]})),api('/api/branches/summary').catch(()=>({branches:[]}))]);S.bsum=su.branches||[];S.sess=a;S.cash=c;S.wk=wk;S.bks=bk.bookings||[];S.bxs=bk.boxes||[];S.ready=1;render()}catch(e){if(e.message!='auth'&&!q){if(v)v.innerHTML=hd('Нет данных')+empty(esc(e.message||'Не удалось загрузить')+'<br><br><button class="ref" data-a="ref">Повторить</button>')}else if(e.message!='auth')toast('Нет связи')}}
 async function boot(){if(!L.cw_token){loginView();return}shell();if(!S.cfg)try{S.cfg=await fetch(API+'/api/config').then(r=>r.json())}catch(e){}if(!S.br&&S.cfg)S.br=S.cfg.branches[0];$('#view').innerHTML=SKEL;await load()}
 addEventListener('resize',moveBlob);if(document.fonts)document.fonts.ready.then(moveBlob);
@@ -431,15 +448,25 @@ function rpAct(a){const x=a.dataset.a,k=a.dataset.k;
  else if(x=='rdl')rpDl(k,'',a)
  else if(x=='rar'){const day=((S.ra&&S.ra.days)||[]).find(z=>z.date==k);if(!day)return;const cs=day.cars||[],raw=cs.reduce((t,c)=>t+(c.price||0),0);
   sh(`<h3>${esc(k)} · ${esc(wdn(k))}</h3><div class="card" style="padding:4px 16px">${r2('Машин',cs.length)}${r2('Выручка до скидок',f(raw)+' ₽','g')}${cs.length?r2('Средний чек',f(raw/cs.length)+' ₽'):''}</div><div class="acts" style="margin-top:16px"><button class="btn c" data-x="rpdf" data-k="${esc(k)}">PDF</button><button class="btn c" data-x="rxlsx" data-k="${esc(k)}">XLSX</button></div><div class="acts" style="margin-top:10px"><button class="btn" data-x="cancel">Закрыть</button></div>`)}}
-async function rpClick(x,k,el){if(x!='rpdf'&&x!='rxlsx')return 0;await rpDl(x=='rpdf'?'pdf':'xlsx',k,el);return 1}
-async function rpDl(kind,date,el){try{el.disabled=true;
+async function rpClick(x,k,el){
+ if(x=='dlshare'){const d=S.dl;if(d){try{await navigator.share({files:[d.file]});closeSh()}catch(e){if(e.name!='AbortError')dlSave(d)}}return 1}
+ if(x=='dlopen'){const d=S.dl;if(d)dlOpen(d);return 1}
+ if(x=='dlsave'){const d=S.dl;if(d){dlSave(d);closeSh()}return 1}
+ if(x!='rpdf'&&x!='rxlsx')return 0;await rpDl(x=='rpdf'?'pdf':'xlsx',k,el);return 1}
+function dlSave(d){const l=document.createElement('a');l.href=d.url;l.download=d.nm;document.body.appendChild(l);l.click();l.remove()}
+function dlOpen(d){const w=window.open(d.url,'_blank');if(!w)location.href=d.url}
+function dlSheet(d){const pdf=d.kind=='pdf',can=navigator.canShare&&navigator.canShare({files:[d.file]});
+ sh(`<h3>${pdf?'PDF':'XLSX'} готов</h3><div class="card" style="padding:4px 16px">${r2('Файл',esc(d.nm))}${r2('Размер',Math.max(1,Math.round(d.bl.size/1024))+' КБ')}</div><div class="acts" style="margin-top:16px;flex-wrap:wrap">`+(can?`<button class="btn c" style="flex:1 1 100%" data-x="dlshare">Поделиться / сохранить в «Файлы»</button>`:'')+(pdf?`<button class="btn" style="flex:1 1 100%" data-x="dlopen">Открыть</button>`:'')+`<button class="btn" style="flex:1 1 100%" data-x="dlsave">Скачать файл</button><button class="btn g2" style="flex:1 1 100%" data-x="cancel">Закрыть</button></div>`)}
+async function rpDl(kind,date,el){const t0=el&&el.textContent;try{if(el){el.disabled=true;el.textContent='Готовим…'}
  const r=await fetch(`${API}/api/reports/${kind}?branch=${encodeURIComponent(S.br)}`+(date?`&date=${encodeURIComponent(date)}`:''),{headers:{'X-Site-Token':L.cw_token||''}});
  if(r.status==401){logout();return}
  if(!r.ok){let d={};try{d=await r.json()}catch(e){}throw new Error(d.detail||('Ошибка '+r.status))}
- const bl=await r.blob(),nm=`Касса_${S.br}_${date||S.sess.session.date||'смена'}.${kind}`,file=new File([bl],nm,{type:bl.type});
- if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file]})}catch(e){if(e.name!='AbortError')throw e}}
- else{const u=URL.createObjectURL(bl),l=document.createElement('a');l.href=u;l.download=nm;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
- }catch(e){if(e.message!='auth')toast(e.message||'Не удалось скачать')}finally{el.disabled=false}}
+ const bl=await r.blob(),nm=`Касса_${S.br}_${date||S.sess.session.date||'смена'}.${kind}`.replace(/[\\/:*?"<>|]/g,'-'),file=new File([bl],nm,{type:bl.type||(kind=='pdf'?'application/pdf':'application/octet-stream')});
+ if(S.dl&&S.dl.url)URL.revokeObjectURL(S.dl.url);const d={bl,nm,file,kind,url:URL.createObjectURL(bl)};S.dl=d;
+ // меню «Поделиться» требует свежего нажатия — если не вышло, показываем окно с кнопками
+ if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file]});return}catch(e){if(e.name=='AbortError')return}dlSheet(d)}
+ else{dlSave(d);toast('Файл скачан');if(kind=='pdf')setTimeout(()=>dlSheet(d),400)}
+ }catch(e){if(e.message!='auth')toast(e.message||'Не удалось скачать')}finally{if(el){el.disabled=false;if(t0)el.textContent=t0}}}
 
 /* ===== v6: Настройки и Филиалы ===== */
 V.set=()=>{const own=L.cw_role=='владелец',ss=S.sess.session,nb=(S.bks||[]).filter(b=>b.status!='no_show').length,onN=((S.wk&&S.wk.workers)||[]).filter(n=>(((S.wk.schedule||{})[n])||{}).working).length,nbr=(S.bsum||[]).length||((S.cfg&&S.cfg.branches)||[]).length;
@@ -459,5 +486,15 @@ async function loadBr(){const own=L.cw_role=='владелец';try{const[sm,u]=
  const inf=await Promise.all(S.bsum.map(b=>api('/api/workers?branch='+encodeURIComponent(b.branch)).catch(()=>null)));S.binf={};S.bsum.forEach((b,i)=>S.binf[b.branch]=inf[i]||{admin_id:0,workers:[]});if(S.tab=='br')render()}catch(e){if(e.message!='auth')toast(e.message||'Не удалось загрузить филиалы')}}
 async function brSwitch(i){const b=(S.bsum||[])[+i];if(!b||b.branch==S.br)return;S.br=b.branch;L.cw_active_branch=b.branch;S.wk=S.wkd=S.es=S.rw=S.rm=S.ra=null;S.tab='home';S._lt='';const v=$('#view');if(v)v.innerHTML=SKEL;await load();toast('Филиал: '+b.branch)}
 async function brAdmin(i){const b=(S.bsum||[])[+i],sl=$('#bsel'+i),uid=sl?parseInt(sl.value,10):0;if(!b)return;if(!uid){toast('Выберите пользователя из белого списка');return}try{await api('/api/branch-admin',{method:'POST',body:JSON.stringify({branch:b.branch,user_id:uid})});toast('Администратор назначен');loadBr()}catch(e){if(e.message!='auth')toast(e.message||'Не удалось назначить')}}
+
+/* ===== v8: высота экрана без прыжков ===== */
+const vhSet=()=>document.documentElement.style.setProperty('--vh',innerHeight+'px');
+const typing=()=>{const e=document.activeElement;return !!e&&/^(INPUT|SELECT|TEXTAREA)$/.test(e.tagName)};
+vhSet();
+addEventListener('resize',()=>{if(!typing()){vhSet();scrollTo(0,0)}moveBlob()});
+addEventListener('orientationchange',()=>setTimeout(()=>{vhSet();moveBlob()},350));
+addEventListener('focusout',()=>setTimeout(()=>{if(!typing()){vhSet();scrollTo(0,0)}},150));
+addEventListener('scroll',()=>{if(!typing())scrollTo(0,0)},{passive:true});
+if(window.visualViewport)visualViewport.addEventListener('scroll',()=>{if(!typing())scrollTo(0,0)});
 boot();
 </script></body></html>
