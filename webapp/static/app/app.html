@@ -192,7 +192,8 @@ input,select,textarea{font-size:16px!important}
 
 /* ===== v9: нижнее меню-«облачко» и режим мойщика ===== */
 html,body,#app{background-color:#060D26}
-#app{top:0;bottom:0;height:auto;min-height:100%}
+#app{top:0;bottom:auto;height:var(--vh,100dvh)}
+html,body{min-height:var(--vh,100dvh)}
 #view{padding-bottom:calc(128px + env(safe-area-inset-bottom,0px))}
 .tabbar{height:70px;background:rgba(14,26,70,.42);-webkit-backdrop-filter:blur(26px) saturate(1.7);backdrop-filter:blur(26px) saturate(1.7);border:1px solid rgba(255,255,255,.16);box-shadow:0 18px 44px -14px rgba(0,0,0,.55),0 0 0 1px rgba(91,214,255,.05),inset 0 1px 0 rgba(255,255,255,.14),inset 0 -1px 0 rgba(255,255,255,.03)}
 .fab{box-shadow:0 14px 30px -8px rgba(47,107,255,.85),0 0 0 6px rgba(14,26,70,.38),0 0 0 7px rgba(255,255,255,.1)}
@@ -501,7 +502,11 @@ async function brSwitch(i){const b=(S.bsum||[])[+i];if(!b||b.branch==S.br)return
 async function brAdmin(i){const b=(S.bsum||[])[+i],sl=$('#bsel'+i),uid=sl?parseInt(sl.value,10):0;if(!b)return;if(!uid){toast('Выберите пользователя из белого списка');return}try{await api('/api/branch-admin',{method:'POST',body:JSON.stringify({branch:b.branch,user_id:uid})});toast('Администратор назначен');loadBr()}catch(e){if(e.message!='auth')toast(e.message||'Не удалось назначить')}}
 
 /* ===== v8: высота экрана без прыжков ===== */
-const vhSet=()=>document.documentElement.style.setProperty('--vh',innerHeight+'px');
+const vhSet=()=>{let h=Math.max(innerHeight,document.documentElement.clientHeight||0);
+ // в установленном приложении iOS innerHeight бывает меньше экрана (снизу остаётся пустая полоса) — берём реальную высоту экрана
+ const st=navigator.standalone||(matchMedia&&matchMedia('(display-mode: standalone)').matches);
+ if(st&&matchMedia('(orientation: portrait)').matches)h=Math.max(h,Math.max(screen.height,screen.width));
+ document.documentElement.style.setProperty('--vh',h+'px')};
 const typing=()=>{const e=document.activeElement;return !!e&&/^(INPUT|SELECT|TEXTAREA)$/.test(e.tagName)};
 vhSet();
 addEventListener('resize',()=>{if(!typing()){vhSet();scrollTo(0,0)}moveBlob()});
