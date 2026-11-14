@@ -208,6 +208,15 @@ html,body{min-height:var(--vh,100dvh)}
 #view{--sb:env(safe-area-inset-bottom,0px);-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 156px - var(--sb)),transparent calc(100% - 104px - var(--sb)));mask-image:linear-gradient(to bottom,#000 calc(100% - 156px - var(--sb)),transparent calc(100% - 104px - var(--sb)))}
 /* спрятанный тост не должен выглядывать у верхнего края */
 .toast{opacity:0;transform:translate(-50%,-160px);transition:transform .4s var(--ease),opacity .25s}.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ===== v12: без размытия, без маски и без тени под меню (на iOS давали полоску) ===== */
+*,*::before,*::after{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+#view{-webkit-mask-image:none!important;mask-image:none!important}
+.tabbar{background:linear-gradient(180deg,#16275f,#0d1a46)!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:none!important}
+.fab{box-shadow:0 0 0 6px #08123a,0 0 0 7px rgba(255,255,255,.1)!important}
+.fab:after{display:none}
+.tb.on,.blob{box-shadow:none!important}
+.sheet-backdrop,.shade{-webkit-backdrop-filter:none!important}
 </style></head>
 <body><div id="app"></div>
 <script>
